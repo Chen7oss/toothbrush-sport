@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>牙刷运动每一天</title>
+<style>
+:root{
+  --ink:#6b4a3d;
+  --ink-soft:#a08272;
+  --cream:#fff8f1;
+  --peach:#ffe3d6;
+  --coral:#ff7f8f;
+  --coral-deep:#ff5f77;
+  --yellow:#ffc94d;
+  --card:rgba(255,255,255,.9);
+  --line:#ffe1df;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",-apple-system,"Segoe UI",sans-serif;
+  background:linear-gradient(160deg,#ffe9dc,#ffe4ee 55%,#e8f3ff);
+  color:var(--ink);
+  overflow:hidden;
+}
+button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer}
+input{font-family:inherit}
+
+/* ============ 手机框 ============ */
+.app{
+  position:relative;
+  margin:0 auto;
+  width:100%;
+  max-width:460px;
+  height:100dvh;
+  background:linear-gradient(170deg,#fff8ef 0%,#ffeff0 40%,#edf6ff 100%);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+@media (min-width:521px){
+  body{overflow:hidden;padding:22px 0}
+  .app{height:calc(100dvh - 44px);border-radius:38px;box-shadow:0 30px 80px rgba(190,110,90,.28)}
+}
+.app::before,.app::after{
+  content:"";position:absolute;border-radius:50%;pointer-events:none;opacity:.4;z-index:0;
+}
+.app::before{width:190px;height:190px;left:-80px;top:80px;background:#ffe2c8}
+.app::after{width:230px;height:230px;right:-100px;top:38%;background:#ffe0ea}
+.deco-star{position:absolute;z-index:0;pointer-events:none;opacity:.5;animation:twinkle 3.4s ease-in-out infinite}
+
+.topbar{
+  position:relative;z-index:2;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  padding:18px 18px 10px;flex:none;
+}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:#c56a72}
+.brand .tooth-ico{font-size:20px}
+.star-total{
+  background:#fff8e8;border:1.5px solid #ffe6a8;color:#b8860b;
+  padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;
+  box-shadow:0 6px 14px rgba(255,190,60,.18);
+}
+
+.app-main{
+  position:relative;z-index:1;
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;
+}
+.app-main::-webkit-scrollbar{display:none}
+
+/* ============ 页面容器 ============ */
+.screen{display:none;padding:8px 20px 30px;min-height:100%}
+.screen.active{display:block;animation:screenIn .42s ease both}
+.screen.reward.active{display:flex;flex-direction:column;justify-content:center}
+.screen.lock.active,.screen.type.active,.screen.detail.active,.screen.history.active{padding-top:4px}
+
+.card{
+  background:var(--card);
+  border:1.5px solid var(--line);
+  border-radius:26px;
+  box-shadow:0 12px 26px rgba(235,150,130,.13);
+  padding:16px;
+}
+.btn-main,.btn-sub,.btn-soft{
+  display:block;width:100%;text-align:center;
+  border-radius:999px;font-size:17px;font-weight:700;
+  padding:15px 20px;transition:transform .12s ease,box-shadow .2s ease,opacity .2s;
+}
+.btn-main{
+  color:#fff;
+  background:linear-gradient(135deg,#ff9d8c,#ff6f88);
+  box-shadow:0 12px 24px rgba(255,111,136,.32);
+}
+.btn-main:hover{opacity:.95}
+.btn-main:active{transform:scale(.97)}
+.btn-sub{
+  background:#fff;color:#c96a70;border:1.5px solid #ffd4d2;
+  margin-top:12px;box-shadow:0 8px 18px rgba(230,150,140,.12);
+}
+.btn-sub:active{transform:scale(.97)}
+.btn-soft{background:#fff2e4;color:#d98a4a;margin-top:12px}
+.muted{color:var(--ink-soft);font-size:13px;line-height:1.6}
+
+/* ============ 首页 ============ */
+.hero{text-align:center;padding-top:2px}
+.mascot-wrap{position:relative;width:178px;height:168px;margin:0 auto 2px}
+.mascot-svg{width:100%;height:100%;filter:drop-shadow(0 14px 16px rgba(255,150,140,.22))}
+.mascot-svg .bob{animation:bob 3.2s ease-in-out infinite;transform-origin:50% 96%}
+.hello{margin-top:2px;font-size:14px;color:#cd8a78;letter-spacing:1px}
+.home-title{margin:3px 0 6px;font-size:26px;font-weight:900;color:#6b4a3d}
+.slogan{font-size:13.5px;color:var(--ink-soft);margin-bottom:16px}
+.today-box{position:relative;padding:15px 17px;margin-bottom:14px}
+.today-box .mini-title{
+  font-size:13px;font-weight:800;color:#cf7f6f;letter-spacing:1px;
+  display:flex;align-items:center;gap:6px;margin-bottom:10px;
+}
+.today-box .mini-title::after{content:"";flex:1;height:1px;background:#ffe2d4}
+.today-empty{text-align:center;color:var(--ink-soft);font-size:13.5px;line-height:1.8;padding:8px 0 4px}
+.mini-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 2px;border-bottom:1px dashed #ffe7df;
+}
+.mini-row:last-child{border-bottom:none;padding-bottom:2px}
+.mini-row .mr-ico{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex:none}
+.mini-row .mr-main{flex:1;min-width:0}
+.mini-row .mr-name{font-weight:700;font-size:14px}
+.mini-row .mr-desc{font-size:12px;color:var(--ink-soft);margin-top:1px}
+.mini-row .mr-star{font-size:14px;font-weight:800;color:#e0962a;white-space:nowrap}
+.today-total{margin-top:10px;text-align:center;font-size:13px;color:#b8860b;background:#fff9e9;border-radius:14px;padding:7px}
+.rules{margin-top:14px;padding:13px 15px}
+.rules .rules-title{font-size:13px;font-weight:800;margin-bottom:8px;color:#c96a70;display:flex;gap:6px;align-items:center}
+.rule-line{display:flex;gap:7px;font-size:12.5px;line-height:1.7;color:#8b6c5c;margin-bottom:6px}
+.rule-line:last-child{margin-bottom:0}
+
+/* ============ 锁屏密码 ============ */
+.lock-hero{text-align:center;padding-top:22px}
+.lock-hero .lock-ico{font-size:54px;animation:bob 3s ease-in-out infinite;display:inline-block}
+.lock-hero h3{font-size:22px;font-weight:900;margin-top:12px}
+.lock-hero p{margin-top:6px}
+.dot-row{display:flex;justify-content:center;gap:12px;margin:22px 0 8px}
+.dot{width:15px;height:15px;border-radius:50%;background:#f3ddd2;border:2px solid #eec9b8;transition:all .18s}
+.dot.filled{background:var(--coral);border-color:var(--coral-deep);transform:scale(1.15);box-shadow:0 0 0 4px rgba(255,127,143,.15)}
+.lock-error{text-align:center;color:#e05a5a;font-size:13px;min-height:20px;margin-top:2px;font-weight:600}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:276px;margin:6px auto 0}
+.kp{
+  height:62px;border-radius:50%;background:#fff;font-size:22px;font-weight:700;color:#6b4a3d;
+  box-shadow:0 7px 14px rgba(210,140,120,.12);transition:transform .1s;
+}
+.kp:active{transform:scale(.9);background:#fff1ec}
+.kp .kp-ico{font-size:24px}
+.kp.blank{visibility:hidden;box-shadow:none}
+
+/* ============ 类型选择 ============ */
+.screen-head{display:flex;align-items:center;gap:10px;margin:2px 0 14px}
+.back-btn{
+  width:38px;height:38px;border-radius:50%;background:#fff;border:1.5px solid var(--line);
+  font-size:20px;color:#c47770;display:grid;place-items:center;flex:none;
+  box-shadow:0 5px 12px rgba(225,150,130,.15);
+}
+.back-btn:active{transform:scale(.92)}
+.head-text h3{font-size:21px;font-weight:900}
+.head-text p{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-bottom:8px}
+.type-card{
+  --ac:#ff7f8f;--ac-soft:#ffe3e7;
+  background:#fff;border:1.5px solid #ffe0e0;border-radius:22px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:14px 6px 12px;min-height:112px;
+  box-shadow:0 9px 18px rgba(230,145,125,.12);
+  transition:transform .14s ease,border-color .2s;
+}
+.type-card:hover{border-color:var(--ac)}
+.type-card:active{transform:scale(.94)}
+.type-card .tc-ico{
+  width:52px;height:52px;border-radius:18px;background:var(--ac-soft);
+  display:grid;place-items:center;font-size:28px;
+}
+.type-card .tc-name{font-weight:800;font-size:14.5px}
+.type-card .tc-unit{font-size:11px;color:#b29584}
+
+/* ============ 记录详情 ============ */
+.detail-big{text-align:center;margin:10px 0 14px}
+.detail-big .db-ico{
+  width:76px;height:76px;border-radius:26px;margin:0 auto;display:grid;place-items:center;font-size:42px;
+  box-shadow:0 12px 24px rgba(235,145,125,.2);
+}
+.detail-big h3{font-size:23px;font-weight:900;margin-top:12px}
+.detail-big .db-rule{
+  display:inline-block;margin-top:8px;background:#fff8e6;color:#b27b1f;border:1px dashed #f2c45a;
+  border-radius:999px;font-size:12px;padding:6px 12px;line-height:1.6;
+}
+.detail-form{margin-top:12px}
+.field{margin-bottom:16px}
+.field>label{display:block;font-weight:800;font-size:14px;margin-bottom:8px;color:#7a5849}
+.field>.field-tip{font-size:11.5px;color:#bda293;margin-top:5px}
+.stepper{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border:1.5px solid #ffdcd3;border-radius:20px;padding:7px;
+  box-shadow:0 6px 14px rgba(235,160,140,.1);
+}
+.step-btn{
+  width:42px;height:42px;flex:none;border-radius:15px;background:#fff1ec;color:#c96a70;
+  font-size:21px;font-weight:800;transition:transform .1s;
+}
+.step-btn:active{transform:scale(.88)}
+.stepper input{
+  flex:1;min-width:0;text-align:center;font-size:25px;font-weight:800;color:#6b4a3d;
+  border:none;outline:none;background:transparent;
+}
+.stepper .unit-label{flex:none;font-size:13px;color:#b08a78;font-weight:700;padding-right:6px}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+.form-error{text-align:center;color:#e05a5a;font-size:13px;font-weight:600;min-height:20px;margin-top:10px}
+
+/* ============ 奖励页 ============ */
+.reward-stage{text-align:center;animation:riseIn .5s ease both}
+.reward-kicker{
+  display:inline-block;background:#ffe9c7;color:#c48110;font-size:13px;font-weight:800;
+  padding:7px 15px;border-radius:999px;letter-spacing:2px;
+}
+.reward-title{font-size:34px;font-weight:900;margin:16px 0 10px;color:#6b4a3d}
+.reward-stars{min-height:62px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;padding:6px 0}
+.reward-star{
+  display:inline-block;font-size:42px;margin:0 3px;
+  animation:starPop .55s cubic-bezier(.28,1.7,.6,1) backwards;
+}
+.star-none{font-size:36px;opacity:.25;filter:grayscale(.9)}
+.reward-line{font-size:14px;color:#c77a68;margin-top:2px}
+.reward-summary{margin:18px auto 0;max-width:330px;text-align:left;padding:12px 16px}
+.reward-summary .summary-title{font-size:13px;font-weight:800;color:#cf7f6f;margin-bottom:4px}
+.reward-summary .mini-row{padding:6px 2px}
+.reward-summary .mr-desc{font-size:12px}
+.reward-actions{max-width:330px;margin:16px auto 0;width:100%}
+.toast{
+  position:fixed;left:50%;bottom:36px;transform:translateX(-50%);
+  background:rgba(90,55,40,.9);color:#fff;font-size:13.5px;border-radius:999px;
+  padding:10px 18px;z-index:99;animation:riseIn .3s ease both;max-width:80%;
+}
+
+/* ============ 记录页 ============ */
+.history-list{padding-bottom:14px}
+.day-group{margin-bottom:16px}
+.day-title{
+  display:flex;align-items:center;gap:8px;margin:4px 2px 8px;
+  font-size:14px;font-weight:800;color:#c47770;
+}
+.day-title .day-stars{margin-left:auto;font-size:12px;color:#e0962a}
+.record-row{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border:1.5px solid #ffe2df;border-radius:18px;
+  padding:10px 12px;margin-bottom:9px;box-shadow:0 6px 13px rgba(230,155,135,.09);
+}
+.record-row .mr-ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex:none}
+.record-row .mr-main{flex:1;min-width:0}
+.record-row .del{
+  width:28px;height:28px;border-radius:50%;background:#fff0ec;color:#d98878;font-size:13px;
+  display:grid;place-items:center;flex:none;
+}
+.record-row .del:active{transform:scale(.9)}
+.empty-history{text-align:center;padding:56px 16px;color:var(--ink-soft)}
+.empty-history .big{font-size:52px;margin-bottom:10px}
+.empty-history .text{font-size:15px;font-weight:700;color:#a56e5c;margin-bottom:6px}
+
+/* ============ 彩带 ============ */
+.confetti{
+  position:fixed;top:-14px;width:9px;height:14px;border-radius:2px;z-index:120;
+  pointer-events:none;animation:confettiFall linear forwards;
+}
+
+/* ============ 动画 ============ */
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-9px) rotate(2deg)}}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:.7;transform:scale(1.15)}}
+@keyframes screenIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes riseIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes starPop{0%{opacity:0;transform:scale(0) rotate(-40deg)}70%{transform:scale(1.35) rotate(8deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes shakeX{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes confettiFall{to{transform:translateY(112vh) rotate(760deg);opacity:.85}}
+.shake{animation:shakeX .4s ease}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="deco-star" style="left:14px;top:150px;font-size:18px">⭐</div>
+  <div class="deco-star" style="right:16px;top:110px;font-size:22px;animation-delay:.8s">✨</div>
+  <div class="deco-star" style="left:24px;top:420px;font-size:16px;animation-delay:1.4s">💛</div>
+  <div class="deco-star" style="right:26px;top:470px;font-size:15px;animation-delay:.4s">🌟</div>
+
+  <header class="topbar">
+    <div class="brand"><span class="tooth-ico">🪥</span>牙刷运动每一天</div>
+    <div class="star-total" id="totalStars">⭐ 0</div>
+  </header>
+
+  <main class="app-main" id="appMain">
+
+    <!-- 首页 -->
+    <section class="screen active" id="screen-home">
+      <div class="hero">
+        <div class="mascot-wrap">
+          <svg class="mascot-svg" viewBox="0 0 220 210" aria-hidden="true">
+            <g class="bob">
+              <g transform="rotate(-8 110 165)">
+                <rect x="90" y="120" width="40" height="84" rx="20" fill="#ff8fa3"/>
+                <rect x="100" y="140" width="20" height="5" rx="2.5" fill="#fff" opacity=".75"/>
+                <rect x="100" y="160" width="20" height="5" rx="2.5" fill="#fff" opacity=".75"/>
+              </g>
+              <rect x="76" y="50" width="68" height="82" rx="28" fill="#fffdf8" stroke="#ffc9d8" stroke-width="4"/>
+              <rect x="77" y="51" width="66" height="25" rx="12.5" fill="#ffb3c8"/>
+              <g stroke="#fffdf8" stroke-width="3" stroke-linecap="round">
+                <line x1="86" y1="48" x2="86" y2="39"/>
+                <line x1="97" y1="48" x2="97" y2="36"/>
+                <line x1="108" y1="48" x2="108" y2="36"/>
+                <line x1="119" y1="48" x2="119" y2="36"/>
+                <line x1="130" y1="48" x2="130" y2="39"/>
+              </g>
+              <circle cx="95" cy="94" r="4.6" fill="#5d463c"/>
+              <circle cx="125" cy="94" r="4.6" fill="#5d463c"/>
+              <circle cx="103" cy="91" r="2.4" fill="#fff"/>
+              <circle cx="133" cy="91" r="2.4" fill="#fff"/>
+              <ellipse cx="84" cy="105" rx="7" ry="4.6" fill="#ffd6de"/>
+              <ellipse cx="136" cy="105" rx="7" ry="4.6" fill="#ffd6de"/>
+              <path d="M99 107 Q110 121 121 107" stroke="#5d463c" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+            </g>
+            <g stroke="#ffc26b" stroke-width="3" stroke-linecap="round">
+              <path d="M166 52 L158 44"/>
+              <path d="M178 70 L188 66"/>
+              <path d="M40 72 L30 78"/>
+            </g>
+          </svg>
+        </div>
+        <p class="hello" id="helloText">你好呀</p>
+        <h2 class="home-title" id="homeDate">今天也要动一动</h2>
+        <p class="slogan">坚持运动，像刷牙一样成为每天的小习惯 ✨</p>
+      </div>
+
+      <div class="today-box card" id="todayBox"></div>
+
+      <button class="btn-main" id="startBtn">✨ 开始今日打卡</button>
+      <button class="btn-sub" id="historyBtn">📒 查看打卡记录</button>
+
+      <div class="rules card">
+        <p class="rules-title">⭐ 星星规则</p>
+        <div class="rule-line"><span>🏃</span><span>慢跑：跑满 1.5 公里得 1 颗星，之后每多跑 0.5 公里再多 1 颗星。</span></div>
+        <div class="rule-line"><span>💪</span><span>快走 / 骑行 / 爬楼 / 跳绳 / 游泳：坚持完成一次打卡得 1 颗星。</span></div>
+      </div>
+    </section>
+
+    <!-- 验证密码 -->
+    <section class="screen lock" id="screen-lock">
+      <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+      <div class="lock-hero">
+        <div class="lock-ico">🔐</div>
+        <h3>请输入验证密码</h3>
+        <p class="muted">输入正确密码后，就可以开始打卡啦</p>
+        <div class="dot-row" id="dotRow">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <p class="lock-error" id="lockError"></p>
+        <div class="keypad" id="keypad"></div>
+      </div>
+    </section>
+
+    <!-- 运动类型 -->
+    <section class="screen type" id="screen-type">
+      <div class="screen-head">
+        <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+        <div class="head-text">
+          <h3>今天想做什么运动？</h3>
+          <p>选一个喜欢的，认真完成它</p>
+        </div>
+      </div>
+      <div class="type-grid" id="typeGrid"></div>
+    </section>
+
+    <!-- 时长与里程 -->
+    <section class="screen detail" id="screen-detail">
+      <div class="screen-head">
+        <button class="back-btn" data-goto="type" aria-label="返回">‹</button>
+        <div class="head-text">
+          <h3>打卡信息</h3>
+          <p>认真填写，星星等你领取</p>
+        </div>
+      </div>
+      <div class="detail-big">
+        <div class="db-ico" id="detailIco" style="background:#ffe3e7">🏃</div>
+        <h3 id="detailName">慢跑</h3>
+        <span class="db-rule" id="detailRule"></span>
+      </div>
+
+      <div class="detail-form card">
+        <div class="field">
+          <label for="durationInput">⏱ 运动时长</label>
+          <div class="stepper">
+            <button type="button" class="step-btn step-minus" data-target="durationInput" data-delta="-5">−</button>
+            <input id="durationInput" type="number" inputmode="decimal" min="1" step="1" placeholder="30">
+            <button type="button" class="step-btn step-plus" data-target="durationInput" data-delta="5">＋</button>
+            <span class="unit-label">分钟</span>
+          </div>
+          <p class="field-tip">想一想今天运动了多久</p>
+        </div>
+
+        <div class="field">
+          <label for="amountInput"><span id="amountLabel">🚩 总里程</span></label>
+          <div class="stepper">
+            <button type="button" class="step-btn step-minus" data-target="amountInput" data-delta="-0.5">−</button>
+            <input id="amountInput" type="number" inputmode="decimal" min="0.1" step="0.5" placeholder="2.5">
+            <button type="button" class="step-btn step-plus" data-target="amountInput" data-delta="0.5">＋</button>
+            <span class="unit-label" id="amountUnit">公里</span>
+          </div>
+          <p class="field-tip" id="amountTip">例如：2.5</p>
+        </div>
+
+        <button class="btn-main" id="saveBtn">✅ 完成打卡</button>
+        <p class="form-error" id="formError"></p>
+      </div>
+    </section>
+
+    <!-- 奖励 -->
+    <section class="screen reward" id="screen-reward">
+      <div class="reward-stage">
+        <p class="reward-kicker">叮！今日打卡成功</p>
+        <h2 class="reward-title" id="rewardTitle">太棒了！</h2>
+        <div class="reward-stars" id="rewardStars"></div>
+        <p class="reward-line" id="rewardLine"></p>
+        <div class="reward-summary card" id="rewardSummary"></div>
+        <div class="reward-actions">
+          <button class="btn-main" id="againBtn">🎽 再记录一次</button>
+          <button class="btn-sub" id="homeBtn2">🏠 回到首页</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 记录 -->
+    <section class="screen history" id="screen-history">
+      <div class="screen-head">
+        <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+        <div class="head-text">
+          <h3>打卡记录</h3>
+          <p>每一个脚印都算数</p>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   活动与星星规则（想改规则，主要改这里就可以）
+   ============================================================ */
+const ACTIVITIES = {
+  run: {
+    name:'慢跑', emoji:'🏃',
+    color:'#ff7f8f', soft:'#ffe3e7',
+    unit:'公里', label:'🚩 总里程', placeholder:'例如 2.5',
+    step:0.5,
+    rule:'跑满 1.5 公里得 1 颗星星，每多跑 0.5 公里再多 1 颗星星',
+    stars: function(v){ return v >= 1.5 ? 1 + Math.floor((v - 1.5) / 0.5 + 1e-9) : 0; }
+  },
+  walk: {
+    name:'快走', emoji:'🚶',
+    color:'#f4a261', soft:'#ffead8',
+    unit:'公里', label:'🚩 总里程', placeholder:'例如 2.0',
+    step:0.5,
+    rule:'坚持完成一次打卡得 1 颗星星',
+    stars: function(){ return 1; }
+  },
+  cycle: {
+    name:'骑行', emoji:'🚴',
+    color:'#5aa9e6', soft:'#e3f2fc',
+    unit:'公里', label:'🚩 总里程', placeholder:'例如 8.0',
+    step:1,
+    rule:'坚持完成一次打卡得 1 颗星星',
+    stars: function(){ return 1; }
+  },
+  stairs: {
+    name:'爬楼', emoji:'🧗',
+    color:'#9a8abf', soft:'#eee9fb',
+    unit:'层', label:'🧱 爬楼层数', placeholder:'例如 30',
+    step:10,
+    rule:'坚持完成一次打卡得 1 颗星星',
+    stars: function(){ return 1; }
+  },
+  rope: {
+    name:'跳绳', emoji:'🪢',
+    color:'#c78ce0', soft:'#f5e7fb',
+    unit:'个', label:'🪢 跳绳个数', placeholder:'例如 500',
+    step:100,
+    rule:'坚持完成一次打卡得 1 颗星星',
+    stars: function(){ return 1; }
+  },
+  swim: {
+    name:'游泳', emoji:'🏊',
+    color:'#4ecdc4', soft:'#def7f3',
+    unit:'米', label:'🌊 游泳距离', placeholder:'例如 400',
+    step:100,
+    rule:'坚持完成一次打卡得 1 颗星星',
+    stars: function(){ return 1; }
+  }
+};
+
+const STORE_KEY = 'ysyd_exercise_v1';
+const PASSWORD = '260326';
+
+/* ---------- 基础工具 ---------- */
+const $ = id => document.getElementById(id);
+const pad2 = n => String(n).padStart(2,'0');
+const toDayKey = d => d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+const todayKey = () => toDayKey(new Date());
+const weekCN = ['周日','周一','周二','周三','周四','周五','周六'];
+const clamp = (v,min,max) => Math.max(min, Math.min(max, v));
+
+function fmtAmount(v){
+  const n = Math.round(v * 100) / 100;
+  return Number.isInteger(n) ? String(n) : String(n);
+}
+function fmtDayCN(key){
+  const d = new Date(key + 'T00:00:00');
+  return (d.getMonth()+1) + '月' + d.getDate() + '日 ' + weekCN[d.getDay()];
+}
+function dayLabel(key){
+  if (key === todayKey()) return '今天';
+  const y = new Date(); y.setDate(y.getDate()-1);
+  if (key === toDayKey(y)) return '昨天';
+  return fmtDayCN(key);
+}
+
+/* ---------- 数据 ---------- */
+let records = [];
+function loadRecords(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    records = raw ? JSON.parse(raw) : [];
+  }catch(e){ records = []; }
+}
+function saveRecords(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(records)); }
+  catch(e){}
+}
+function addRecord(activity, minutes, amount){
+  const record = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    date: todayKey(),
+    time: new Date().toTimeString().slice(0,5),
+    activity,
+    minutes: Math.round(minutes),
+    amount: Math.round(amount * 100) / 100,
+    stars: ACTIVITIES[activity].stars(amount, minutes)
+  };
+  records.push(record);
+  saveRecords();
+  return record;
+}
+function totalStars(){ return records.reduce((s,r)=>s+(r.stars||0),0); }
+function todayStars(){ return records.filter(r=>r.date===todayKey()).reduce((s,r)=>s+(r.stars||0),0); }
+function todayRecords(){ return records.filter(r=>r.date===todayKey()).sort((a,b)=>b.time.localeCompare(a.time)); }
+
+/* ---------- 状态 ---------- */
+const state = {
+  unlocked: false,
+  activity: null,
+  lastStars: 0
+};
+
+/* ---------- 页面切换 ---------- */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  $('screen-' + name).classList.add('active');
+  $('appMain').scrollTop = 0;
+}
+
+/* ---------- 顶部星星 ---------- */
+function updateStarsTop(){
+  $('totalStars').textContent = '⭐ 累计 ' + totalStars();
+}
+
+/* ---------- 首页 ---------- */
+function renderHome(){
+  const now = new Date();
+  const h = now.getHours();
+  const hello = h < 5 ? '夜深了' : h < 9 ? '早上好' : h < 12 ? '上午好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好';
+  $('helloText').textContent = hello + '，今天也要元气满满呀';
+  $('homeDate').textContent = '今天是 ' + fmtDayCN(todayKey());
+
+  const box = $('todayBox');
+  const rows = todayRecords();
+  if (!rows.length){
+    box.innerHTML =
+      '<div class="mini-title">🌞 今日打卡</div>' +
+      '<div class="today-empty">今天还没有打卡哦～<br>完成一次运动，点亮今天的星星吧</div>';
+    return;
+  }
+  let html = '<div class="mini-title">🌞 今日打卡</div>';
+  rows.forEach(r=>{
+    const a = ACTIVITIES[r.activity];
+    html +=
+      '<div class="mini-row">' +
+        '<div class="mr-ico" style="background:'+a.soft+'">'+a.emoji+'</div>' +
+        '<div class="mr-main">' +
+          '<div class="mr-name">'+a.name+'</div>' +
+          '<div class="mr-desc">'+r.time+' · '+r.minutes+' 分钟 · '+fmtAmount(r.amount)+' '+a.unit+'</div>' +
+        '</div>' +
+        '<div class="mr-star">'+(r.stars ? '⭐×'+r.stars : '继续加油')+'</div>' +
+      '</div>';
+  });
+  html += '<div class="today-total">今日共获得 <b>'+todayStars()+'</b> 颗星星 ✨</div>';
+  box.innerHTML = html;
+}
+
+/* ---------- 验证密码 ---------- */
+let entered = '';
+function renderKeypad(){
+  const pad = $('keypad');
+  const keys = ['1','2','3','4','5','6','7','8','9','blank','0','del'];
+  pad.innerHTML = keys.map(k=>{
+    if (k === 'blank') return '<div class="kp blank"></div>';
+    if (k === 'del') return '<button type="button" class="kp" data-key="del" aria-label="删除"><span class="kp-ico">⌫</span></button>';
+    return '<button type="button" class="kp" data-key="'+k+'">'+k+'</button>';
+  }).join('');
+}
+function updateDots(){
+  document.querySelectorAll('#dotRow .dot').forEach((d,i)=>{
+    d.classList.toggle('filled', i < entered.length);
+  });
+}
+function openLock(){
+  entered = '';
+  updateDots();
+  $('lockError').textContent = '';
+  showScreen('lock');
+}
+function submitPassword(){
+  if (entered !== PASSWORD){
+    $('lockError').textContent = '密码不对哦，再想想～';
+    const box = $('screen-lock');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    entered = '';
+    updateDots();
+    return;
+  }
+  state.unlocked = true;
+  openTypeScreen();
+}
+
+/* ---------- 运动类型 ---------- */
+function openTypeScreen(){
+  showScreen('type');
+  renderTypeGrid();
+}
+function renderTypeGrid(){
+  const grid = $('typeGrid');
+  grid.innerHTML = Object.entries(ACTIVITIES).map(([key,a])=>
+    '<button type="button" class="type-card" data-activity="'+key+'" style="--ac:'+a.color+';--ac-soft:'+a.soft+'">' +
+      '<span class="tc-ico">'+a.emoji+'</span>' +
+      '<span class="tc-name">'+a.name+'</span>' +
+      '<span class="tc-unit">'+a.unit+'</span>' +
+    '</button>'
+  ).join('');
+}
+
+/* ---------- 详情页 ---------- */
+function openDetail(key){
+  const a = ACTIVITIES[key];
+  state.activity = key;
+  $('detailIco').textContent = a.emoji;
+  $('detailIco').style.background = a.soft;
+  $('detailName').textContent = a.name;
+  $('detailRule').textContent = a.rule;
+  $('amountLabel').textContent = a.label;
+  $('amountUnit').textContent = a.unit;
+  $('amountInput').step = a.step === 1 ? '1' : String(a.step);
+  $('amountInput').placeholder = a.placeholder;
+  $('amountTip').textContent = a.unit === '公里' ? '例如：' + a.placeholder : '想一想完成了多少';
+  $('amountInput').value = '';
+  $('durationInput').value = '';
+  $('formError').textContent = '';
+  showScreen('detail');
+}
+function adjustStepper(targetId, delta){
+  const input = $(targetId);
+  const cur = parseFloat(input.value);
+  const next = isNaN(cur) ? (delta > 0 ? Math.abs(delta) : 0) : cur + delta;
+  const min = parseFloat(input.min || 0);
+  const max = parseFloat(input.max || 99999);
+  input.value = fmtAmount(clamp(Math.round(next * 100) / 100, min, max));
+}
+
+/* ---------- 打卡保存 ---------- */
+function validateInputs(){
+  const act = ACTIVITIES[state.activity];
+  const dur = parseFloat($('durationInput').value);
+  const amt = parseFloat($('amountInput').value);
+  if (!isFinite(dur) || dur <= 0) return {ok:false, msg:'运动时长要大于 0 分钟哦'};
+  if (!isFinite(amt) || amt <= 0) return {ok:false, msg:'请填写' + act.label.replace(/^[^\u4e00-\u9fa5]*/, '') + '哦'};
+  if (dur > 1440) return {ok:false, msg:'一天最多 1440 分钟，检查一下哦'};
+  return {ok:true, dur, amt};
+}
+
+/* ---------- 奖励页 ---------- */
+function renderReward(rec){
+  const a = ACTIVITIES[rec.activity];
+  const stars = rec.stars;
+  $('rewardTitle').textContent = stars > 0 ? '收获 ' + stars + ' 颗星星！' : '继续加油！';
+
+  if (stars > 0){
+    const n = Math.min(stars, 30);
+    let starHtml = '';
+    for (let i=0;i<n;i++){
+      starHtml += '<span class="reward-star" style="animation-delay:'+(i*0.1).toFixed(2)+'s">⭐</span>';
+    }
+    if (stars > 30) starHtml += '<span class="reward-star" style="animation-delay:3s">×'+stars+'</span>';
+    $('rewardStars').innerHTML = starHtml;
+  }else{
+    $('rewardStars').innerHTML = '<span class="star-none">⭐</span>';
+  }
+
+  if (rec.activity === 'run'){
+    if (stars === 0){
+      const left = Math.max(0, 1.5 - rec.amount);
+      $('rewardLine').textContent = '再坚持 ' + left.toFixed(1) + ' 公里，就能拿到第一颗星星啦 💪';
+    }else{
+      const next = 1.5 + stars * 0.5;
+      const left = Math.max(0, next - rec.amount);
+      $('rewardLine').textContent = left <= 0.02
+        ? '今天跑得很棒，继续保持哦！'
+        : '离下一颗星星还差 ' + left.toFixed(1) + ' 公里 ✨';
+    }
+  }else{
+    $('rewardLine').textContent = '坚持运动的小牙刷最棒啦！';
+  }
+
+  $('rewardSummary').innerHTML =
+    '<p class="summary-title">📝 本次打卡</p>' +
+    '<div class="mini-row">' +
+      '<div class="mr-ico" style="background:'+a.soft+'">'+a.emoji+'</div>' +
+      '<div class="mr-main">' +
+        '<div class="mr-name">'+a.name+'</div>' +
+        '<div class="mr-desc">'+rec.minutes+' 分钟 · '+fmtAmount(rec.amount)+' '+a.unit+' · '+rec.time+'</div>' +
+      '</div>' +
+      '<div class="mr-star">'+(stars ? '⭐×'+stars : '0 星')+'</div>' +
+    '</div>';
+
+  launchConfetti(stars);
+  updateStarsTop();
+  showScreen('reward');
+}
+function saveCheckin(){
+  const res = validateInputs();
+  if (!res.ok){
+    $('formError').textContent = res.msg;
+    return;
+  }
+  $('formError').textContent = '';
+  const rec = addRecord(state.activity, res.dur, res.amt);
+  renderHome();
+  renderReward(rec);
+}
+
+/* ---------- 彩带 ---------- */
+function launchConfetti(stars){
+  const colors = ['#ff7f8f','#ffc94d','#ff9d8c','#7ec8e3','#c78ce0','#ffd166','#8fd9c0'];
+  const n = stars > 0 ? Math.min(26 + stars * 3, 90) : 24;
+  for (let i=0;i<n;i++){
+    const el = document.createElement('span');
+    el.className = 'confetti';
+    el.style.left = (Math.random()*100).toFixed(1) + 'vw';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration = (2.4 + Math.random()*1.8).toFixed(2) + 's';
+    el.style.animationDelay = (Math.random()*0.7).toFixed(2) + 's';
+    el.style.transform = 'rotate('+Math.floor(Math.random()*360)+'deg)';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 5600);
+  }
+}
+
+/* ---------- 记录页 ---------- */
+function renderHistory(){
+  const list = $('historyList');
+  if (!records.length){
+    list.innerHTML =
+      '<div class="empty-history">' +
+        '<div class="big">🪥</div>' +
+        '<div class="text">还没有打卡记录</div>' +
+        '<p class="muted">去完成第一次运动打卡吧</p>' +
+      '</div>';
+    return;
+  }
+  const sorted = records.slice().sort((x,y)=> (y.date===x.date ? y.time.localeCompare(x.time) : y.date.localeCompare(x.date)));
+  const groups = [];
+  sorted.forEach(r=>{
+    const last = groups[groups.length-1];
+    if (last && last.date === r.date) last.rows.push(r);
+    else groups.push({date:r.date, rows:[r]});
+  });
+
+  let html = '';
+  groups.forEach(g=>{
+    const dayStars = g.rows.reduce((s,r)=>s+(r.stars||0),0);
+    html += '<div class="day-group">' +
+      '<div class="day-title"><span>📅</span>'+dayLabel(g.date)+
+      '<span class="day-stars">⭐ 共 '+dayStars+' 颗</span></div>';
+    g.rows.forEach(r=>{
+      const a = ACTIVITIES[r.activity];
+      html +=
+        '<div class="record-row">' +
+          '<div class="mr-ico" style="background:'+a.soft+'">'+a.emoji+'</div>' +
+          '<div class="mr-main">' +
+            '<div class="mr-name">'+a.name+'</div>' +
+            '<div class="mr-desc">'+r.time+' · '+r.minutes+' 分钟 · '+fmtAmount(r.amount)+' '+a.unit+'</div>' +
+          '</div>' +
+          '<div class="mr-star" style="font-size:13px">'+(r.stars ? '⭐×'+r.stars : '记下啦')+'</div>' +
+          '<button type="button" class="del" data-id="'+r.id+'" aria-label="删除记录">✕</button>' +
+        '</div>';
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+function deleteRecord(id){
+  const rec = records.find(r=>r.id===id);
+  if (!rec) return;
+  if (!window.confirm('删除这条' + ACTIVITIES[rec.activity].name + '的打卡记录吗？')){
+    return;
+  }
+  records = records.filter(r=>r.id!==id);
+  saveRecords();
+  renderHome();
+  renderHistory();
+  updateStarsTop();
+}
+
+/* ---------- 事件绑定 ---------- */
+function bindEvents(){
+  renderKeypad();
+
+  $('startBtn').addEventListener('click', ()=>{
+    if (state.unlocked) openTypeScreen();
+    else openLock();
+  });
+  $('historyBtn').addEventListener('click', ()=>{ renderHistory(); showScreen('history'); });
+  $('homeBtn2').addEventListener('click', ()=>{ renderHome(); showScreen('home'); });
+  $('againBtn').addEventListener('click', openTypeScreen);
+
+  document.querySelectorAll('[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target = btn.dataset.goto;
+      if (target === 'home') renderHome();
+      showScreen(target);
+    });
+  });
+
+  document.getElementById('screen-lock').querySelector('.back-btn').addEventListener('click', ()=>{ renderHome(); showScreen('home'); });
+  document.getElementById('screen-type').querySelector('.back-btn').addEventListener('click', ()=>{ renderHome(); showScreen('home'); });
+  document.getElementById('screen-detail').querySelector('.back-btn').addEventListener('click', ()=>openTypeScreen());
+  document.getElementById('screen-history').querySelector('.back-btn').addEventListener('click', ()=>{ renderHome(); showScreen('home'); });
+
+  $('keypad').addEventListener('click', e=>{
+    const btn = e.target.closest('.kp');
+    if (!btn || btn.classList.contains('blank')) return;
+    const key = btn.dataset.key;
+    if (key === 'del'){
+      entered = entered.slice(0,-1);
+    }else if (entered.length < 6){
+      entered += key;
+    }
+    updateDots();
+    if (entered.length === 6){
+      setTimeout(submitPassword, 220);
+    }
+  });
+
+  $('typeGrid').addEventListener('click', e=>{
+    const card = e.target.closest('.type-card');
+    if (card) openDetail(card.dataset.activity);
+  });
+
+  document.querySelectorAll('.step-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      adjustStepper(btn.dataset.target, parseFloat(btn.dataset.delta));
+    });
+  });
+  $('saveBtn').addEventListener('click', saveCheckin);
+
+  $('historyList').addEventListener('click', e=>{
+    const del = e.target.closest('.del');
+    if (del) deleteRecord(del.dataset.id);
+  });
+
+  document.addEventListener('keydown', e=>{
+    if (!$('screen-lock').classList.contains('active')) return;
+    if (/^[0-9]$/.test(e.key)){
+      if (entered.length < 6){
+        entered += e.key;
+        updateDots();
+        if (entered.length === 6) setTimeout(submitPassword, 180);
+      }
+    }else if (e.key === 'Backspace'){
+      entered = entered.slice(0,-1);
+      updateDots();
+    }
+  });
+}
+
+/* ---------- 启动 ---------- */
+loadRecords();
+renderHome();
+updateStarsTop();
+bindEvents();
+</script>
+</body>
+</html>
